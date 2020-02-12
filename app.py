@@ -9,6 +9,8 @@ import numpy as np
 from sklearn.datasets.samples_generator import make_blobs
 from sklearn.cluster import KMeans
 import random
+import csv
+import os
 
 #Style Sheets
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -134,10 +136,16 @@ def update_graph(no_of_clusters, pokemon):
     itemindex = np.where(y_kmeans5==cluster_nu)
     a = [item for item in itemindex]
     nearest = random.sample(list(a[0]), 5)
-    print(nearest)
+    #print(nearest)
+    pokemon_names = []
     for i in nearest:
         pokemon_names.append(names[i])
-    print(pokemon_names)
+    #print(pokemon_names)
+    with open('names.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(pokemon_names)
+
     data = []
     xaxes = dict(title="x: Attack", showgrid=True, zeroline=True, showticklabels=True)
     yaxes = dict(title="y: Defence", showgrid=True, zeroline=True, showticklabels=True)
@@ -172,10 +180,15 @@ def update_graph(option, pokemon_names):
     #Get Pokemon Names and their values corresponding to options (ex . Attack, Defense, Speed, Catch_Rate)
 
     option_value = []
-
+    with open('names.csv') as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        for row in readCSV:
+            pokemon_names = row
+            
     #Get the values for each pokemon according to selected option
     filtered_df = df[["Name","Attack", "Defense", "Speed", "Catch_Rate"]]
     print(pokemon_names)
+
     for name in pokemon_names:
         option_df = df[(df.Name == name)]
         option_value.append(int(option_df.iloc[0][option]))
@@ -216,7 +229,10 @@ def updateRadarGraph(names):
                   'Sp_Def', 'Speed']
 
     fig = go.Figure()
-
+    with open('names.csv') as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        for row in readCSV:
+            names = row
     num = len(names)
 
     for i in range(num):
