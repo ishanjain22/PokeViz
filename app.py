@@ -10,6 +10,7 @@ from sklearn.datasets.samples_generator import make_blobs
 from sklearn.cluster import KMeans
 import random
 import csv
+import json
 import os
 
 #Style Sheets
@@ -18,14 +19,14 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__ , external_stylesheets = external_stylesheets)
 
 #Read CSV
-df = pd.read_csv('Data/pokemon/pokemon_alopez247.csv')
+df = pd.read_csv('pokemon/pokemon_alopez247.csv')
 
 names = df['Name']
 num = ['1','2','3','4','5','6','7','8','9','10']
 #nearest = []
 #Drop down for second graph
 option_list = ["Attack", "Defense", "Speed", "Catch_Rate"]
-pokemon_names = []
+#pokemon_names = []
 
 #App Layout
 app.layout = html.Div(children=[
@@ -84,22 +85,23 @@ app.layout = html.Div(children=[
             'boxSizing': 'border-box',
         }
     ),
-        dcc.Checklist(
-            id='pokemonCheck',
-            options=[
-                {'label': i, 'value': i} for i in pokemon_names
-            ],
-            value=[],
-            labelStyle={  # Different padding for the checklist elements
-                'display': 'inline-block',
-                'paddingRight': 10,
-                'paddingLeft': 10,
-                'paddingBottom': 5,
-            },
+    html.Div(
+        children=[
+            html.Div(
+                id='list',
+                children=[
+                    dcc.Checklist(id="pokemonCheck", value = [])
+                ])
+            ]
+    ),
 
-        ),
     html.Div(
         id = 'output-graph1'
+    ),
+
+    html.Div(
+        id='intermediate-value',
+        style={'display': 'none'}
     ),
 
     html.Div([
@@ -114,7 +116,8 @@ app.layout = html.Div(children=[
         'paddingLeft': 5,
         'boxSizing' : 'border-box',
         'fontFamily' : "Arial"
-    }
+    },
+
     )
 
 ])
@@ -170,6 +173,41 @@ def update_graph(no_of_clusters, pokemon):
 
     return figure
 
+@app.callback(Output('intermediate-value', 'children'),
+    [Input(component_id='dropdown', component_property='value'),
+    Input(component_id='dropdown2', component_property='value')])
+
+def intermediate(no_of_clusters, pokemon):
+    x = df.iloc[:, [6, 7, 10]].values
+    names = df.iloc[:, 1].values
+    kmeans5 = KMeans(n_clusters=int(no_of_clusters))
+    y_kmeans5 = kmeans5.fit_predict(x)
+    # a = kmeans5.cluster_centers_
+    index = np.nonzero(names == pokemon)
+    cluster_nu = y_kmeans5[index]
+    itemindex = np.where(y_kmeans5 == cluster_nu)
+    a = [item for item in itemindex]
+    nearest = random.sample(list(a[0]), 5)
+    # print(nearest)
+    pokemon_names = []
+    for i in nearest:
+        pokemon_names.append(names[i])
+
+    return json.dumps(pokemon_names)
+
+@app.callback(Output('pokemonCheck', component_property='options'),
+    [Input('intermediate-value', 'children')])
+
+def pokemonCheckList(jsonified_pokemon):
+    dff = pd.read_json(jsonified_pokemon)
+    intermediate_pokemon = dff.values.tolist()
+    pokemon_names = []
+    for i in range(len(intermediate_pokemon)):
+        pokemon_names.append(intermediate_pokemon[i][0])
+    print(pokemon_names)
+    print(type(pokemon_names[0]))
+    return [{'label' : i, 'value' : i} for i in pokemon_names]
+
 @app.callback(
     Output(component_id='output-graph1', component_property='children'),
     [Input(component_id='option_dropdown', component_property='value'),
@@ -180,11 +218,12 @@ def update_graph(option, pokemon_names):
     #Get Pokemon Names and their values corresponding to options (ex . Attack, Defense, Speed, Catch_Rate)
 
     option_value = []
+    '''
     with open('names.csv') as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         for row in readCSV:
             pokemon_names = row
-            
+    '''
     #Get the values for each pokemon according to selected option
     filtered_df = df[["Name","Attack", "Defense", "Speed", "Catch_Rate"]]
     print(pokemon_names)
@@ -229,10 +268,12 @@ def updateRadarGraph(names):
                   'Sp_Def', 'Speed']
 
     fig = go.Figure()
+    '''
     with open('names.csv') as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         for row in readCSV:
             names = row
+    '''
     num = len(names)
 
     for i in range(num):
