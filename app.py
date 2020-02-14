@@ -16,8 +16,12 @@ import os
 #Style Sheets
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__ , external_stylesheets = external_stylesheets)
 
+app = dash.Dash(__name__ , external_stylesheets = external_stylesheets)
+cssURL = "https://rawgit.com/richard-muir/uk-car-accidents/master/road-safety.css"
+app.css.append_css({
+    "external_url": cssURL
+})
 #Read CSV
 df = pd.read_csv('pokemon/pokemon_alopez247.csv')
 
@@ -27,12 +31,22 @@ num = ['1','2','3','4','5','6','7','8','9','10']
 #Drop down for second graph
 option_list = ["Attack", "Defense", "Speed", "Catch_Rate"]
 #pokemon_names = []
-
+FONT_FAMILY =  "Arial" 
 #App Layout
 app.layout = html.Div(children=[
-    html.H1(children = "PokeDex"),
-    html.H3(children= "Data Visualization Assignment 4"),
-    html.H3(children= "By Ishan Jain, Sanjat Mishra, Kavish Doshi"),
+    html.H1(children = "PokeDex",style={
+            'paddingLeft' : '14em',
+            'fontFamily' : FONT_FAMILY
+            }),
+    html.H3(children= "Assignment 4",style={
+            'paddingLeft' : '21em',
+            'fontFamily' : FONT_FAMILY
+            }),
+    html.H3(children= "Ishan Jain, Sanjat Mishra, Kavish Doshi",style={
+            'paddingLeft' : '17em',
+            'fontFamily' : FONT_FAMILY,
+            'paddingBottom':'1em'
+            }),
     html.Div([
         html.Label('Select number of clusters'),
         dcc.Dropdown(
@@ -40,7 +54,7 @@ app.layout = html.Div(children=[
             options=[
                 {'label': i, 'value': i} for i in num
             ],
-            value='2',
+            value='2'
         ),
         html.Label('Select a pokemon'),
         dcc.Dropdown(
@@ -52,21 +66,17 @@ app.layout = html.Div(children=[
         ),
     ],
         style={
-            "width": '80%',
-            'paddingLeft': 200,
-            'paddingRight': 50,            
+            "width": '90%',
+            'paddingLeft': '4em',
+            'paddingBottom':'1em' ,
+            'display':'inline-block',
         }
     ),
     html.Div(
         className="Pokemon Viz",
         children=[
-            dcc.Graph(id="output-graph", style={"height": "98vh"})
-        ],
-        style={
-            "width": '80%',
-            'paddingLeft': 200,
-            'paddingRight': 50,            
-        }
+            dcc.Graph(id="output-graph", style={"height": "26em","paddingBottom":'2em','float':'left','width':'30%','paddingRight':'2em'})
+        ]
     ),
     html.Div([
         dcc.Dropdown(
@@ -78,10 +88,9 @@ app.layout = html.Div(children=[
         )
     ],
         style={
-            "width": '50%',
+            "width": '23%',
             'display': 'inline-block',
-            'paddingLeft': 10,
-            'paddingRight': 60,
+            'paddingLeft': '0em',
             'boxSizing': 'border-box',
         }
     ),
@@ -90,18 +99,35 @@ app.layout = html.Div(children=[
             html.Div(
                 id='list',
                 children=[
-                    dcc.Checklist(id="pokemonCheck", value = [])
+                    dcc.Checklist(id="pokemonCheck", value = [],
+                    labelStyle = {
+                        'display':'inline-block',
+                        'paddingRight':'1em'
+                    }
+                    )
                 ])
             ]
     ),
 
     html.Div(
-        id = 'output-graph1'
+        id = 'output-graph1',
+        style = {
+        
+        'width' : '33%',
+        'display' : 'inline-block',
+        'boxSizing' : 'border-box',
+        'fontFamily' : "Arial",
+        'float':'left',
+        "height": "20em"
+
+        }
     ),
 
     html.Div(
         id='intermediate-value',
-        style={'display': 'none'}
+        style = {
+            'display' : 'none'
+        }
     ),
 
     html.Div([
@@ -110,12 +136,13 @@ app.layout = html.Div(children=[
         )
     ],
     style={
-        'width' : '100%',
+        'width' : '30%',
         'display' : 'inline-block',
-        'paddingRight': 50,
-        'paddingLeft': 5,
+        'paddingRight': '0em',
         'boxSizing' : 'border-box',
-        'fontFamily' : "Arial"
+        'fontFamily' : "Arial",
+        'float':'right',
+        "height": "20em"
     },
 
     )
